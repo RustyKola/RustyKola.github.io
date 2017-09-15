@@ -149,14 +149,16 @@
 									directors2 = directors.join(" & ");
 									
 									if(directed == true){
-									
-										finalresults.push(season.episodes[iiii].air_date + " | <b>" + directors2 + "</b> | <i>" + mydata.crew[i].name + "</i> (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '" | ' + genres + " | " + minutes(details.episode_run_time[0]));
+										var finalline = season.episodes[iiii].air_date + " | <b>" + directors2 + "</b> | <i>" + mydata.crew[i].name + "</i> (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '" | ' + genres + " | " + minutes(details.episode_run_time[0]);
+										finalresults.push(finalline);
+										document.write(finalline + "<br />");
 									}
 								
 								}
 							}
 							
-						}else{
+						}else
+						{
 							
 							//Load genres of film
 							var details = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + mydata.crew[i].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
@@ -184,7 +186,9 @@
 							var directors2 = directors.join(" & ");
 							
 							//Print final line
-							finalresults.push(mydata.crew[i].release_date + " | <b>" + directors2 + "</b> | <i>" + mydata.crew[i].title + "</i> | " + genres + " | " + minutes(details.runtime));
+							var finalline = mydata.crew[i].release_date + " | <b>" + directors2 + "</b> | <i>" + mydata.crew[i].title + "</i> | " + genres + " | " + minutes(details.runtime);
+							finalresults.push(finalline);
+							document.write(finalline + "<br />");
 						}
 					}
 					
@@ -218,8 +222,10 @@
 						}
 					}
 					var directors2 = directors.join(" & ");
-				
-					finalresults.push(details.release_date + " | <b>" + directors2 + "</b> | <i>" + details.title + "</i> | " + genres + " | " + minutes(details.runtime));
+					
+					var finalline = details.release_date + " | <b>" + directors2 + "</b> | <i>" + details.title + "</i> | " + genres + " | " + minutes(details.runtime);
+					finalresults.push(finalline);
+					document.write(finalline + "<br />");
 					
 					var percent = ((u + 1) / Object.keys(getfilms.results).length)*100;
 					document.title = Math.round(percent) + "%";
@@ -269,8 +275,10 @@
 							}
 							
 							directors2 = directors.join(" & ");
-						
-							finalresults.push(season.episodes[iiii].air_date + " | <b>" + directors2 + "</b> | <i>" + details.name + "</i> (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '" | ' + genres + " | " + minutes(details.episode_run_time[0]));
+							
+							var finalline = season.episodes[iiii].air_date + " | <b>" + directors2 + "</b> | <i>" + details.name + "</i> (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '" | ' + genres + " | " + minutes(details.episode_run_time[0]);
+							finalresults.push(finalline);
+							document.write(finalline + "<br />");
 						
 						}
 					}	
@@ -280,6 +288,7 @@
 			}
 			}
 			finalresults.sort();
+			document.body.innerHTML = "";
 			document.write(finalresults.join("<br />"));
 		</script>
 	</body>
