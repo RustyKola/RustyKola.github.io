@@ -190,8 +190,8 @@
 			}else if(QueryString("film")){
 			
 				var getfilms = JSON.parse(getJSON("https://api.themoviedb.org/3/search/movie?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US&page=1&include_adult=false&query=" + QueryString("film")));
-			
-				var details = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + getfilms.results[0].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+				for(u = 0; u < Object.keys(getfilms.results).length; u++){
+				var details = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + getfilms.results[u].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
 				var arrgenres = [];
 				for(ii = 0; ii < Object.keys(details.genres).length; ii++){
 					arrgenres[ii] = details.genres[ii].name;
@@ -203,7 +203,7 @@
 					var genres = arrgenres.join(", ");
 				}
 				
-				var credits = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + getfilms.results[0].id + "/credits?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+				var credits = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + getfilms.results[u].id + "/credits?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
 				var directors = [];
 				var numdirectors = -1;
 				
@@ -216,12 +216,14 @@
 				var directors2 = directors.join(" & ");
 			
 				document.write(details.release_date + "|" + directors2 + "|" + details.title + "|" + genres + "|" + minutes(details.runtime)+ "<br />");
+				}
 			
 			}else if(QueryString("tv")){
 			
 				var getshows = JSON.parse(getJSON("https://api.themoviedb.org/3/search/tv?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US&page=1&include_adult=false&query=" + QueryString("tv")));
+				for(x = 0; x < Object.keys(getshows.results).length; x++){
 				
-				var details = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + getshows.results[0].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+				var details = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + getshows.results[x].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
 				var arrgenres = [];
 				for(ii = 0; ii < Object.keys(details.genres).length; ii++){
 					arrgenres[ii] = details.genres[ii].name;
@@ -242,7 +244,7 @@
 
 				//Loop through seasons and find episodes directored by director
 				for(iii = 0; iii < seasons.length; iii++){
-					var season = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + getshows.results[0].id + "/season/" + seasons[iii] + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+					var season = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + getshows.results[x].id + "/season/" + seasons[iii] + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
 					for(iiii = 0; iiii < Object.keys(season.episodes).length; iiii++){
 					
 						var directors = [];
@@ -265,7 +267,7 @@
 					
 					}
 				}				
-			
+			}
 			}
 			
 		</script>
