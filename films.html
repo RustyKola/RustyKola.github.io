@@ -84,8 +84,12 @@
 			if(QueryString("director")){
 			
 				//Load films of first returned director
-				var getpeople = JSON.parse(getJSON("https://api.themoviedb.org/3/search/person?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US&page=1&query=" + QueryString("director")));
-				var mydata = JSON.parse(getJSON("https://api.themoviedb.org/3/person/" + getpeople.results[0].id + "/combined_credits?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+				if(QueryString("id")){
+					var mydata = JSON.parse(getJSON("https://api.themoviedb.org/3/person/" + QueryString("id") + "/combined_credits?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+				}else{
+					var getpeople = JSON.parse(getJSON("https://api.themoviedb.org/3/search/person?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US&page=1&query=" + QueryString("director")));
+					var mydata = JSON.parse(getJSON("https://api.themoviedb.org/3/person/" + getpeople.results[0].id + "/combined_credits?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+				}
 				
 				for (i = 0; i < Object.keys(mydata.crew).length; i++){
 					
