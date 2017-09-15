@@ -287,9 +287,13 @@
 					document.title = Math.round(percent) + "%";
 			}
 			}
+			if (finalresults.length > 0){
 			finalresults.sort();
 			document.body.innerHTML = "";
 			document.write(finalresults.join("<br />"));
+			}else{
+			document.body.innerHTML = "director (optional id), film, tv";
+			}
 		</script>
 	</body>
 </html>
