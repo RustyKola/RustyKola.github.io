@@ -1,0 +1,216 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="UTF-8"> 
+		<script type="text/javascript">
+			
+			function sleep(milliseconds) {
+				var start = new Date().getTime();
+				for (var i = 0; i < 1e7; i++) {
+					if ((new Date().getTime() - start) > milliseconds){
+						break;
+					}
+				}
+			}
+			
+			//Read query strings from URL
+			function QueryString(variable){
+				try{
+					q = location.search.substring(1);
+					v = q.split("&");
+					for( var i = 0; i < v.length; i++ ){
+						p = v[i].split("=");
+						if( p[0] == variable ){
+							if( p[1].indexOf('%20') != -1 ){
+								return decodeURIComponent(p[1]);
+							}
+							else{
+								return p[1];
+							}
+						}
+					}
+				}
+				catch (e){
+					console.log(e);
+				}
+			}
+			
+			//Return JSON
+			function getJSON(url) {
+				
+				var resp ;
+				var xmlHttp ;
+
+				resp  = '' ;
+				xmlHttp = new XMLHttpRequest();
+
+				if(xmlHttp != null)
+				{
+					xmlHttp.open( "GET", url, false );
+					xmlHttp.send( null );
+					resp = xmlHttp.responseText;
+				}
+				
+				sleep(500);
+
+				return resp ;
+				
+			}
+			
+			//Change name from Joe Bloggs to Bloggs, Joe
+			function orderName(name) {
+			
+				var orderedname;
+				var nameArr = name.split(/\s+/);
+				var first_name = nameArr.slice(0, -1).join(" ");
+				var last_name = nameArr.pop();
+				orderedname = last_name + ", " + first_name;
+				return orderedname;
+			
+			}
+		</script>
+	</head>
+	<body>
+		<script type="text/javascript">
+						
+			if(QueryString("director")){
+			
+				//Load films of first returned director
+				var getpeople = JSON.parse(getJSON("https://api.themoviedb.org/3/search/person?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US&page=1&query=" + QueryString("director")));
+				var mydata = JSON.parse(getJSON("https://api.themoviedb.org/3/person/" + getpeople.results[0].id + "/combined_credits?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+				
+				for (i = 0; i < Object.keys(mydata.crew).length; i++){
+					
+					//Select all productions in which they served as director
+					if(mydata.crew[i].job == "Director"){
+					
+						//Check if production if television show
+						if(mydata.crew[i].media_type == "tv"){
+						
+							//Load genres of television show
+							var details = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + mydata.crew[i].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+							var arrgenres = [];
+							for(ii = 0; ii < Object.keys(details.genres).length; ii++){
+								arrgenres[ii] = details.genres[ii].name;
+							}
+							var genres = arrgenres.join(", ");
+							
+							//Load number of seasons of TV show
+							var seasons = [];
+							var tvdetails = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + mydata.crew[i].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+							
+							for(u = 0; u < Object.keys(tvdetails.seasons).length; u++){
+							
+								seasons[u] = tvdetails.seasons[u].season_number;
+							
+							}
+							
+							//Loop through seasons and find episodes directored by director
+							for(iii = 0; iii < seasons.length; iii++){
+								var season = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + mydata.crew[i].id + "/season/" + seasons[iii] + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+								for(iiii = 0; iiii < Object.keys(season.episodes).length; iiii++){
+								
+									var directors = [];
+									var numdirectors = -1;
+									var directed = false;
+									
+									for(iiiii = 0; iiiii < Object.keys(season.episodes[iiii].crew).length; iiiii++){
+																					
+										if(season.episodes[iiii].crew[iiiii].job == "Director"){
+										
+											numdirectors = numdirectors + 1;
+											directors[numdirectors] = orderName(season.episodes[iiii].crew[iiiii].name);
+											
+											if(season.episodes[iiii].crew[iiiii].id == getpeople.results[0].id){
+											
+												directed = true;
+											
+											}
+										
+										}
+									
+									}
+									
+									directors2 = directors.join(" & ");
+									
+									if(directed == true){
+									
+										document.write(directors2 + "|" + mydata.crew[i].name + " (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '"|' + season.episodes[iiii].air_date + "|" + genres + "<br />");
+									}
+								
+								}
+							}
+							
+						}else{
+							
+							//Load genres of film
+							var details = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + mydata.crew[i].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+							var arrgenres = [];
+							for(ii = 0; ii < Object.keys(details.genres).length; ii++){
+								arrgenres[ii] = details.genres[ii].name;
+							}
+							var genres = arrgenres.join(", ");
+							
+							//Load director(s) of film
+							var credits = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + mydata.crew[i].id + "/credits?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+							var directors = [];
+							var numdirectors = -1;
+							for(iii = 0; iii < Object.keys(credits.crew).length; iii++){
+								if(credits.crew[iii].job == "Director"){
+								numdirectors = numdirectors + 1;
+								directors[numdirectors] = orderName(credits.crew[iii].name);
+								}
+							}
+							var directors2 = directors.join(" & ");
+							
+							//Load genres of film
+							document.write(directors2 + "|" + mydata.crew[i].title + "|" + mydata.crew[i].release_date + "|" + genres + "<br />");
+						}
+					}
+				}
+			}
+			
+		</script>Lynch, David|The Straight Story|1999-10-15|Drama<br>Lynch, David|Wild at Heart|1990-05-01|Comedy, Crime, Thriller<br>Lynch, David|Lost Highway|1997-01-15|Drama, Thriller, Mystery<br>Lynch, David|Blue Velvet|1986-08-01|Crime, Drama, Mystery, Thriller<br>Lynch, David|Dune|1984-12-14|Action, Science Fiction, Adventure<br>Lynch, David|Eraserhead|1977-03-19|Drama, Fantasy, Horror, Science Fiction<br>Lynch, David|Mulholland Drive|2001-05-16|Thriller, Drama, Mystery<br>Lynch, David|Inland Empire|2006-09-06|Horror, Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks: Fire Walk with Me|1992-06-03|Drama, Mystery<br>Lynch, David|The Elephant Man|1980-10-02|Drama, History<br>Lynch, David|More Things That Happened|2007-08-14|Mystery, Drama<br>Angelopoulos,
+ Theo &amp; Assayas, Olivier &amp; August, Bille &amp; Campion, Jane 
+&amp; Chahine, Youssef &amp; Kaige, Chen &amp; Cimino, Michael &amp; 
+Coen, Ethan &amp; Coen, Joel &amp; Cronenberg, David &amp; Dardenne, 
+Jean-Pierre &amp; Dardenne, Luc &amp; Oliveira, Manoel de &amp; 
+Depardon, Raymond &amp; Egoyan, Atom &amp; Gitai, Amos &amp; Iñárritu, 
+Alejandro González &amp; Hsiao-hsien, Hou &amp; Kaurismäki, Aki &amp; 
+Kiarostami, Abbas &amp; Kitano, Takeshi &amp; Konchalovsky, Andrei &amp;
+ Lelouch, Claude &amp; Loach, Ken &amp; Lynch, David &amp; Moretti, 
+Nanni &amp; Polanski, Roman &amp; Ruiz, Raúl &amp; Salles, Walter &amp; 
+Suleiman, Elia &amp; Ming-liang, Tsai &amp; Sant, Gus Van &amp; Trier, 
+Lars von &amp; Wenders, Wim &amp; Kar-wai, Wong &amp; Yimou, Zhang|To 
+Each His Own Cinema|2007-05-19|Comedy, Drama<br>Lynch, David &amp; Signorelli, James|Hotel Room|1993-04-01|Mystery, Drama, Comedy<br>Lynch, David|The Alphabet|1968-01-01|Animation<br>Lynch, David|Industrial Symphony No. 1: The Dream of the Brokenhearted|1990-01-01|Music<br>Lynch, David|Rabbits|2002-01-01|Comedy, Drama, Fantasy, Horror<br>Lynch, David|The Grandmother|1970-01-01|Thriller, Action, Drama<br>Lynch, David|The Short Films of David Lynch|2002-06-01|Animation, Documentary, Drama<br>Lynch, David|Absurda|2007-05-16|Mystery, Horror<br>Hallström,
+ Lasse &amp; Aranda, Vicente &amp; Boorman, John &amp; Chahine, Youssef 
+&amp; Corneau, Alain &amp; Depardon, Raymond &amp; Girod, Francis &amp; 
+Kiarostami, Abbas &amp; Klapisch, Cédric &amp; Lee, Spike &amp; Lelouch,
+ Claude &amp; Haneke, Michael &amp; Lynch, David &amp; Wenders, Wim 
+&amp; Costa-Gavras,  &amp; Angelopoulos, Theo &amp; Greenaway, Peter 
+&amp; Hudson, Hugh &amp; Kaboré, Gaston &amp; Konchalovsky, Andrei &amp;
+ Luna, Bigas &amp; Moon, Sarah &amp; Penn, Arthur &amp; Sanders-Brahms, 
+Helma &amp; Schatzberg, Jerry &amp; Trintignant, Nadine &amp; Trueba, 
+Fernando &amp; Ullmann, Liv &amp; Dormael, Jaco Van &amp; Wargnier, 
+Régis &amp; Yoshida, Yoshishige &amp; Yimou, Zhang &amp; Allouache, 
+Merzak &amp; Axel, Gabriel &amp; Ivory, James &amp; Leconte, Patrice 
+&amp; Merchant, Ismail &amp; Miller, Claude &amp; Ouedraogo, Idrissa 
+&amp; Rivette, Jacques &amp; Pintilie, Lucian|Lumière and 
+Company|1995-01-01|<br>Lynch, David|Boat|2007-01-30|Foreign<br>Lynch, David|Six Men Getting Sick|1967-01-01|Animation<br>Lynch, David|The Amputee|1974-01-01|Drama<br>Lynch, David|The Cowboy and the Frenchman|1988-01-01|Comedy, Western<br>Lynch, David|Premonitions Following an Evil Deed|1995-12-20|Crime, Mystery<br>Lynch, David|Darkened Room|2002-04-12|Drama<br>Lynch, David|Lady Blue Shanghai|2010-05-16|Drama, Mystery<br>Lynch, David|Eraserhead Stories|2001-09-06|Documentary<br>Lynch, David|The 3 Rs|2011-09-21|<br>Anger,
+ Kenneth &amp; Argento, Asia &amp; Caouette, Jonathan &amp; Carax, Leos 
+&amp; Ferrara, Abel &amp; Kikuchi, Rinko &amp; Franco, James &amp; 
+Korine, Harmony &amp; Noé, Gaspar &amp; Lynch, David &amp; Mekas, Jonas 
+&amp; Yuan, Zhang &amp; Waititi, Taika &amp; Marshall, Chan &amp; 
+Burnett, Charles &amp; Figgis, Mike &amp; Clark, Larry &amp; Asano, 
+Tadanobu &amp; Bodrov, Sergei &amp; Butler, Brian &amp; Caro, Niki &amp;
+ Chang, Yung &amp; Civetta, Michele &amp; Coleman, Joe &amp; Croitoroo, 
+Zachary &amp; Graham, Chris &amp; Habicht, Florian &amp; Koh, Terence 
+&amp; Ye, Lou &amp; Griffin, Marcus &amp; McGinley, Ryan &amp; Mehta, 
+Rajan &amp; Milk, Chris &amp; Morrison, Grant &amp; Muhl, Charlotte Kemp
+ &amp; Poon, Dee &amp; Pyke, Matt &amp; Reygadas, Carlos &amp; Schnabel,
+ Lola &amp; Sigismondi, Floria &amp; Sinabel, Mote &amp; Wohl, Arden|42 
+One Dream Rush|2010-09-15|Fantasy<br>Lynch, David|Dumbland|2002-03-18|<br>Lynch, David|Mulholland Dr.|1999-01-01|Thriller, TV Movie, Drama, Mystery<br>Lynch, David|Idem Paris|2013-02-04|Documentary<br>Lynch, David|Absurd Encounter with Fear|1967-03-05|Horror, Fantasy<br>Lynch, David|Blue Green|2007-08-20|<br>Lynch, David|Bug Crawls|2007-01-30|<br>Lynch, David|Duran Duran: Unstaged|2014-03-09|Music<br>Lynch, David|Twin Peaks: Fire Walk with Me - The Missing Pieces|2014-07-29|TV Movie, Thriller, Drama, Crime<br>Lynch, David|Ballerina|2007-12-31|<br>Lynch, David|Sailing with Bushnell Keeler|1967-01-01|Documentary<br>Lynch, David|Quinoa|2007-01-01|<br>Herzog,
+ Werner &amp; Lynch, David &amp; Comencini, Luigi &amp; Godard, Jean-Luc
+ &amp; Wajda, Andrzej|The French as Seen by…|1988-01-01|War, 
+Documentary, Drama<br>Lynch, David|Out Yonder (Neighbor Boy)|2007-09-10|Comedy<br>Lynch, David|Fictitious Anacin Commercial|1967-01-01|<br>Lynch, David|I Touch a Red Button|2011-04-15|Music<br>Lynch, David|Twin Peaks|1989-12-31|Drama, Mystery<br>Lynch, David|Crazy Clown Time|2012-01-01|Music<br>Lynch, David|Dream #7|2010-09-15|<br>Lynch, David|Pierre and Sonny Jim|2001-08-04|<br>Lynch, David|Lamp|2003-09-09|Documentary<br>Lynch, David|Moby: Shot in the Back of the Head|2009-04-14|Music<br>Lynch, David|On the Air (Season 1 Episode 1) "The Lester Guy Show"|1992-06-20|Comedy<br>Lynch, David|Hotel Room (Season 1 Episode 2) "Getting Rid of Robert"|1993-01-08|Drama<br>Lynch, David|Twin Peaks (Specials Episode 1) "Fire Walk With Me"|1992-05-08|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (Season 1 Episode 1) "Pilot"|1990-04-08|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (Season 1 Episode 3) "Zen, Or The Skill To Catch A Killer"|1990-04-19|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (Season 2 Episode 1) "May The Giant Be With You"|1990-09-30|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (Season 2 Episode 2) "Coma"|1990-10-06|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (Season 2 Episode 7) "Lonely Souls"|1990-11-10|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (Season 2 Episode 22) "Beyond Life and Death"|1991-06-10|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 1) "Part 1"|2017-05-21|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 2) "Part 2"|2017-05-21|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 3) "Part 3"|2017-05-21|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 4) "Part 4"|2017-05-21|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 5) "Part 5"|2017-06-04|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 6) "Part 6"|2017-06-11|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 7) "Part 7"|2017-06-18|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 8) "Part 8"|2017-06-25|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 9) "Part 9"|2017-07-09|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 10) "Part 10"|2017-07-16|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 11) "Part 11"|2017-07-23|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 12) "Part 12"|2017-07-30|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 13) "Part 13"|2017-08-06|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 14) "Part 14"|2017-08-13|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 15) "Part 15"|2017-08-20|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 16) "Part 16"|2017-08-27|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 17) "Part 17"|2017-09-03|Drama, Mystery, Thriller<br>Lynch, David|Twin Peaks (The Return Episode 18) "Part 18"|2017-09-03|Drama, Mystery, Thriller<br>
+	
+</body></html>
