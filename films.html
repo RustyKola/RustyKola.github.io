@@ -146,7 +146,7 @@
 									
 									if(directed == true){
 									
-										document.write(season.episodes[iiii].air_date + "|" + directors2 + "|" + mydata.crew[i].name + " (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + "|" + genres + "|" + minutes(details.episode_run_time[0])+ "<br />");
+										document.write(season.episodes[iiii].air_date + "|" + directors2 + "|" + mydata.crew[i].name + " (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '"|' + genres + "|" + minutes(details.episode_run_time[0])+ "<br />");
 									}
 								
 								}
@@ -261,7 +261,7 @@
 						
 						directors2 = directors.join(" & ");
 					
-						document.write(season.episodes[iiii].air_date + "|" + directors2 + "|" + details.name + " (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + "|" + genres + "|" + minutes(details.episode_run_time[0])+ "<br />");
+						document.write(season.episodes[iiii].air_date + "|" + directors2 + "|" + details.name + " (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '"|' + genres + "|" + minutes(details.episode_run_time[0])+ "<br />");
 					
 					}
 				}				
