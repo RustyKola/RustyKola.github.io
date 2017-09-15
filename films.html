@@ -191,31 +191,34 @@
 			
 				var getfilms = JSON.parse(getJSON("https://api.themoviedb.org/3/search/movie?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US&page=1&include_adult=false&query=" + QueryString("film")));
 				for(u = 0; u < Object.keys(getfilms.results).length; u++){
-				var details = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + getfilms.results[u].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
-				var arrgenres = [];
-				for(ii = 0; ii < Object.keys(details.genres).length; ii++){
-					arrgenres[ii] = details.genres[ii].name;
-				}
-							
-				if (arrgenres.length < 1) {
-					var genres = "None";
-				}else{
-					var genres = arrgenres.join(", ");
-				}
-				
-				var credits = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + getfilms.results[u].id + "/credits?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
-				var directors = [];
-				var numdirectors = -1;
-				
-				for(iii = 0; iii < Object.keys(credits.crew).length; iii++){
-					if(credits.crew[iii].job == "Director"){
-						numdirectors = numdirectors + 1;
-						directors[numdirectors] = orderName(credits.crew[iii].name);
+					var details = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + getfilms.results[u].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+					var arrgenres = [];
+					for(ii = 0; ii < Object.keys(details.genres).length; ii++){
+						arrgenres[ii] = details.genres[ii].name;
 					}
-				}
-				var directors2 = directors.join(" & ");
-			
-				document.write(details.release_date + "|" + directors2 + "|" + details.title + "|" + genres + "|" + minutes(details.runtime)+ "<br />");
+								
+					if (arrgenres.length < 1) {
+						var genres = "None";
+					}else{
+						var genres = arrgenres.join(", ");
+					}
+					
+					var credits = JSON.parse(getJSON("https://api.themoviedb.org/3/movie/" + getfilms.results[u].id + "/credits?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+					var directors = [];
+					var numdirectors = -1;
+					
+					for(iii = 0; iii < Object.keys(credits.crew).length; iii++){
+						if(credits.crew[iii].job == "Director"){
+							numdirectors = numdirectors + 1;
+							directors[numdirectors] = orderName(credits.crew[iii].name);
+						}
+					}
+					var directors2 = directors.join(" & ");
+				
+					document.write(details.release_date + "|" + directors2 + "|" + details.title + "|" + genres + "|" + minutes(details.runtime)+ "<br />");
+					
+					var percent = ((u + 1) / Object.keys(getfilms.results).length)*100;
+					document.title = Math.round(percent) + "%";
 				}
 			
 			}else if(QueryString("tv")){
@@ -223,50 +226,53 @@
 				var getshows = JSON.parse(getJSON("https://api.themoviedb.org/3/search/tv?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US&page=1&include_adult=false&query=" + QueryString("tv")));
 				for(x = 0; x < Object.keys(getshows.results).length; x++){
 				
-				var details = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + getshows.results[x].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
-				var arrgenres = [];
-				for(ii = 0; ii < Object.keys(details.genres).length; ii++){
-					arrgenres[ii] = details.genres[ii].name;
-				}
-				if (arrgenres.length < 1) {
-					var genres = "None";
-				}else{
-					var genres = arrgenres.join(", ");
-				}
-				
-				var seasons = [];
-				
-				for(u = 0; u < Object.keys(details.seasons).length; u++){
-				
-					seasons[u] = details.seasons[u].season_number;
-				
-				}
-
-				//Loop through seasons and find episodes directored by director
-				for(iii = 0; iii < seasons.length; iii++){
-					var season = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + getshows.results[x].id + "/season/" + seasons[iii] + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
-					for(iiii = 0; iiii < Object.keys(season.episodes).length; iiii++){
+					var details = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + getshows.results[x].id + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+					var arrgenres = [];
+					for(ii = 0; ii < Object.keys(details.genres).length; ii++){
+						arrgenres[ii] = details.genres[ii].name;
+					}
+					if (arrgenres.length < 1) {
+						var genres = "None";
+					}else{
+						var genres = arrgenres.join(", ");
+					}
 					
-						var directors = [];
-						var numdirectors = -1;
-						
-						for(iiiii = 0; iiiii < Object.keys(season.episodes[iiii].crew).length; iiiii++){
-																		
-							if(season.episodes[iiii].crew[iiiii].job == "Director"){
-							
-								numdirectors = numdirectors + 1;
-								directors[numdirectors] = orderName(season.episodes[iiii].crew[iiiii].name);
-							
-							}
-						
-						}
-						
-						directors2 = directors.join(" & ");
+					var seasons = [];
 					
-						document.write(season.episodes[iiii].air_date + "|" + directors2 + "|" + details.name + " (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '"|' + genres + "|" + minutes(details.episode_run_time[0])+ "<br />");
+					for(u = 0; u < Object.keys(details.seasons).length; u++){
+					
+						seasons[u] = details.seasons[u].season_number;
 					
 					}
-				}				
+
+					//Loop through seasons and find episodes directored by director
+					for(iii = 0; iii < seasons.length; iii++){
+						var season = JSON.parse(getJSON("https://api.themoviedb.org/3/tv/" + getshows.results[x].id + "/season/" + seasons[iii] + "?api_key=048efc4935935faf6d3fe72f670014fa&language=en-US"));
+						for(iiii = 0; iiii < Object.keys(season.episodes).length; iiii++){
+						
+							var directors = [];
+							var numdirectors = -1;
+							
+							for(iiiii = 0; iiiii < Object.keys(season.episodes[iiii].crew).length; iiiii++){
+																			
+								if(season.episodes[iiii].crew[iiiii].job == "Director"){
+								
+									numdirectors = numdirectors + 1;
+									directors[numdirectors] = orderName(season.episodes[iiii].crew[iiiii].name);
+								
+								}
+							
+							}
+							
+							directors2 = directors.join(" & ");
+						
+							document.write(season.episodes[iiii].air_date + "|" + directors2 + "|" + details.name + " (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '"|' + genres + "|" + minutes(details.episode_run_time[0])+ "<br />");
+						
+						}
+					}	
+				
+				var percent = ((x + 1) / Object.keys(getshows.results).length)*100;
+					document.title = Math.round(percent) + "%";
 			}
 			}
 			
