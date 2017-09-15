@@ -80,7 +80,7 @@
 	</head>
 	<body>
 		<script type="text/javascript">
-						
+			var finalresults = [];			
 			if(QueryString("director")){
 			
 				//Load films of first returned director
@@ -150,7 +150,7 @@
 									
 									if(directed == true){
 									
-										document.write(season.episodes[iiii].air_date + " | <b>" + directors2 + "</b> | <i>" + mydata.crew[i].name + "</i> (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '" | ' + genres + " | " + minutes(details.episode_run_time[0])+ "<br />");
+										finalresults.push(season.episodes[iiii].air_date + " | <b>" + directors2 + "</b> | <i>" + mydata.crew[i].name + "</i> (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '" | ' + genres + " | " + minutes(details.episode_run_time[0]));
 									}
 								
 								}
@@ -184,7 +184,7 @@
 							var directors2 = directors.join(" & ");
 							
 							//Print final line
-							document.write(mydata.crew[i].release_date + " | <b>" + directors2 + "</b> | <i>" + mydata.crew[i].title + "</i> | " + genres + " | " + minutes(details.runtime)+ "<br />");
+							finalresults.push(mydata.crew[i].release_date + " | <b>" + directors2 + "</b> | <i>" + mydata.crew[i].title + "</i> | " + genres + " | " + minutes(details.runtime));
 						}
 					}
 					
@@ -219,7 +219,7 @@
 					}
 					var directors2 = directors.join(" & ");
 				
-					document.write(details.release_date + " | <b>" + directors2 + "</b> | <i>" + details.title + "</i> | " + genres + " | " + minutes(details.runtime)+ "<br />");
+					finalresults.push(details.release_date + " | <b>" + directors2 + "</b> | <i>" + details.title + "</i> | " + genres + " | " + minutes(details.runtime));
 					
 					var percent = ((u + 1) / Object.keys(getfilms.results).length)*100;
 					document.title = Math.round(percent) + "%";
@@ -270,7 +270,7 @@
 							
 							directors2 = directors.join(" & ");
 						
-							document.write(season.episodes[iiii].air_date + " | <b>" + directors2 + "</b> | <i>" + details.name + "</i> (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '" | ' + genres + " | " + minutes(details.episode_run_time[0])+ "<br />");
+							finalresults.push(season.episodes[iiii].air_date + " | <b>" + directors2 + "</b> | <i>" + details.name + "</i> (" + season.name + " Episode " + season.episodes[iiii].episode_number + ') "' + season.episodes[iiii].name + '" | ' + genres + " | " + minutes(details.episode_run_time[0]));
 						
 						}
 					}	
@@ -279,7 +279,8 @@
 					document.title = Math.round(percent) + "%";
 			}
 			}
-			
+			finalresults.sort();
+			document.write(finalresults.join("<br />"));
 		</script>
 	</body>
 </html>
